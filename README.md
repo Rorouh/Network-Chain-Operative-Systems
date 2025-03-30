@@ -1,6 +1,7 @@
 SOchain Project - Git Usage Guide
 
-This guide outlines the minimal steps to use Git for the SOchain project.
+This guide is to know how to download the project and then updload it.
+
 1. Clone the Repository
 
 Clone the remote repository to your local machine:
@@ -43,13 +44,3 @@ Before starting new work, update your local repository:
 
 git pull origin main
 
-Replace main with your branch name if needed.
-7. Additional Tips
-
-    Use git status to check the current state of your repository.
-
-    Use git log to view the commit history.
-
-    Write clear commit messages to help your team understand your changes.
-
-    If you encounter merge conflicts during a pull, resolve them manually and then commit the changes.
