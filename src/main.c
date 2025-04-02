@@ -31,6 +31,6 @@ int main(int argc, char *argv[]) {
     // Liberação da memória antes de terminar
     destroy_shared_memory_structs(info, buffs);
     destroy_dynamic_memory_structs(info, buffs);
-
+    
     return 0;
 }
