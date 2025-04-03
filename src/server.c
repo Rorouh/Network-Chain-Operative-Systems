@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "server.h"
+#include "../inc/server.h"
 
 void server_receive_transaction(struct transaction* tx, struct info_container* info, struct buffers* buffs) {
     if (*(info->terminate) == 1) {

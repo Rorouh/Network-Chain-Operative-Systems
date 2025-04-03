@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "process.h"
+#include "../inc/process.h"
 
 int launch_wallet(int wallet_id, struct info_container* info, struct buffers* buffs) {
     int pid = fork();

@@ -1,34 +1,35 @@
-# Archivos fuente: main.c, memory.c, process.c, server.c, wallet.c
-# Ejecutable: SOchain
-
+# Makefile para el proyecto SOchain
 # Miguel Angel Lopez Sanchez fc65675
 # Alejandro Dominguez fc64447
-# Bruno Felisberto fc32435
+# Bruno Felisberto fc32447
 
 CC = gcc
 CFLAGS = -Wall -Wextra -g
-OBJ = main.o memory.o process.o server.o wallet.o
-EXEC = SOchain
 
-#Comprobar el ficheor .bin añadirlo al proyecto cuando se haga el main para que funcione
+SRCDIR = src
+OBJDIR = obj
+BINDIR = bin
 
-all: $(EXEC)
+SRC = $(wildcard $(SRCDIR)/*.c)
+OBJ = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRC))
+EXEC = $(BINDIR)/SOchain
+
+all: $(BINDIR) $(EXEC)
+
+$(BINDIR):
+	mkdir -p $(BINDIR)
 
 $(EXEC): $(OBJ)
 	$(CC) $(CFLAGS) -o $(EXEC) $(OBJ)
 
-%.o: %.c
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+	mkdir -p $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-run: $(EXEC)
+run: all
 	./$(EXEC)
 
 clean:
 	rm -f $(OBJ)
-
-fclean: clean
 	rm -f $(EXEC)
 
-re: fclean all
-
-.PHONY: all run clean fclean re

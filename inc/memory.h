@@ -116,4 +116,7 @@ void read_wallets_servers_buffer(struct circ_buffer* buffer, int buffer_size, st
  */
 void read_servers_main_buffer(struct ra_buffer* buffer, int tx_id, int buffer_size, struct transaction* tx);
 
+void create_shared_memory_for_buffers(struct buffers* buffs, int buffer_size);
+void destroy_shared_memory_for_buffers(struct buffers* buffs, int buffer_size);
+
 #endif

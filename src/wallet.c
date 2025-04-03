@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "wallet.h"
+#include "../inc/wallet.h"
 
 
 void wallet_receive_transaction(struct transaction* tx, int wallet_id, struct info_container* info, struct buffers* buffs) {
