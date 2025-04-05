@@ -9,11 +9,10 @@
 
 
 void wallet_receive_transaction(struct transaction* tx, int wallet_id, struct info_container* info, struct buffers* buffs) {
-    //comprobar si se ha solicitado la terminación
     if (*(info->terminate) == 1) {
         return;
     }
-    //leee una transacción del buffer entre Main y Wallets
+
     read_main_wallets_buffer(buffs->buff_main_wallets, wallet_id, info->buffers_size, tx);
 }
 
@@ -24,6 +23,7 @@ void wallet_process_transaction(struct transaction* tx, int wallet_id, struct in
         //incrementa el contador de transacciones firmadas por esta cartera
         info->wallets_stats[wallet_id]++;
     }
+    
 }
 
 void wallet_send_transaction(struct transaction* tx, struct info_container* info, struct buffers* buffs) {

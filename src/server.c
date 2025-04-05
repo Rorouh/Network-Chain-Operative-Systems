@@ -39,7 +39,7 @@ void server_process_transaction(struct transaction* tx, int server_id, struct in
     info->balances[tx->dest_id] += tx->amount;
     
     //firma la transacción con el id del servidor
-    tx->server_signature = server_id;
+    tx->server_signature = server_id+1;
     
     //incrementa el contador de transacciones procesadas por este servidor
     info->servers_stats[server_id]++;
