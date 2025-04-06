@@ -18,35 +18,35 @@ int execute_wallet(int wallet_id, struct info_container* info, struct buffers* b
     int transacciones_firmadas = 0;
     struct transaction tx;
     
-    //inicializar la transacción como "vacía"
+    // inicializar a transação como "vazia"
     tx.id = -1;
     while (1) {
-        //se verifica si se ha solicitado el "terminate"
+        // verifica se o "terminate" foi pedido
         if (*(info->terminate) == 1) {
             break;
         }
         
-        //se intenta leer una transacción desde el buffer de Main.Wallets
+        //é feita uma tentativa de ler uma transação a partir do buffer Main.Wallets
         wallet_receive_transaction(&tx, wallet_id, info, buffs);
         
-        //si no se obtuvo una transacción válida, esperar unos milisegundos y continuar
+        // se não foi obtida uma transação válida, aguardar alguns milissegundos e depois continua
         if (tx.id == -1) {
             usleep(100000); 
             continue;
         }
         
-        //procesar(firmar) la transacción solo si el src_id coincide
+        // processar (assinar) a transação apenas se o src_id corresponder ao da carteira
         if (tx.src_id == wallet_id) {
             wallet_process_transaction(&tx, wallet_id, info);
             transacciones_firmadas++;
-            // Enviar la transacción firmada al buffer de Wallets->Servers
+            // enviar a transação assinada para o buffer Wallets->Servers
             wallet_send_transaction(&tx, info, buffs);
         }
         
-        //einiciar la variable de transacción para la siguiente iteración
+        // inicia a variável de transação para a próxima iteração
         tx.id = -1;
     }
-    //al finalizar, la wallet devuelve el número de transacciones firmadas totales
+    // após a conclusão, a carteira devolve o número total de transações assinadas
     return transacciones_firmadas;
 }
 
@@ -69,6 +69,7 @@ void wallet_receive_transaction(struct transaction* tx, int wallet_id, struct in
 void wallet_process_transaction(struct transaction* tx, int wallet_id, struct info_container* info) {
     if (tx->src_id == wallet_id) {
         tx->wallet_signature = wallet_id;
+        // aumenta o contador de transações assinadas por esta carteira
         info->wallets_stats[wallet_id]++;
     }
     

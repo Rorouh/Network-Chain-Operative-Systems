@@ -10,26 +10,46 @@ SRCDIR = src
 OBJDIR = obj
 BINDIR = bin
 
-SRC = $(wildcard $(SRCDIR)/*.c)
-OBJ = $(patsubst $(SRCDIR)/%.c,$(OBJDIR)/%.o,$(SRC))
-EXEC = $(BINDIR)/SOchain
+# Lista explícita de ficheros fuente y objetos
+SOURCES = main.c memory.c process.c server.c wallet.c
+OBJECTS = main.o memory.o process.o server.o wallet.o
 
-all: $(BINDIR) $(EXEC)
+EXEC = SOchain
+
+all: $(BINDIR)/$(EXEC)
 
 $(BINDIR):
 	mkdir -p $(BINDIR)
 
-$(EXEC): $(OBJ)
-	$(CC) $(CFLAGS) -o $(EXEC) $(OBJ)
-
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
+$(OBJDIR):
 	mkdir -p $(OBJDIR)
-	$(CC) $(CFLAGS) -c $< -o $@
 
+$(BINDIR)/$(EXEC): $(addprefix $(OBJDIR)/, $(OBJECTS)) | $(BINDIR)
+	$(CC) $(CFLAGS) -o $(BINDIR)/$(EXEC) $(addprefix $(OBJDIR)/, $(OBJECTS))
+
+$(OBJDIR)/main.o: $(SRCDIR)/main.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $(SRCDIR)/main.c -o $(OBJDIR)/main.o
+
+$(OBJDIR)/memory.o: $(SRCDIR)/memory.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $(SRCDIR)/memory.c -o $(OBJDIR)/memory.o
+
+$(OBJDIR)/process.o: $(SRCDIR)/process.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $(SRCDIR)/process.c -o $(OBJDIR)/process.o
+
+$(OBJDIR)/server.o: $(SRCDIR)/server.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $(SRCDIR)/server.c -o $(OBJDIR)/server.o
+
+$(OBJDIR)/wallet.o: $(SRCDIR)/wallet.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $(SRCDIR)/wallet.c -o $(OBJDIR)/wallet.o
+
+# Regla para ejecutar el programa con argumentos por defecto:
 run: all
-	./$(EXEC)
+	./$(BINDIR)/$(EXEC) 100.0 3 2 10 50
 
+# clean: elimina únicamente los archivos objeto del directorio obj
 clean:
-	rm -f $(OBJ)
-	rm -f $(EXEC)
+	rm -f $(OBJDIR)/*.o
 
+# fclean: elimina también el ejecutable en bin
+fclean: clean
+	rm -f $(BINDIR)/$(EXEC)

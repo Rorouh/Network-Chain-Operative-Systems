@@ -17,9 +17,9 @@
  */
 int execute_wallet(int wallet_id, struct info_container* info, struct buffers* buffs);
 
-/* Función que lee una transacción del buffer entre la Main y las Wallets,
- * solo si el campo src_id coincide con el wallet_id de esta cartera.
- * Si info->terminate es 1, la función retorna inmediatamente sin hacer nada.
+/* Função que lê uma transação do buffer de memória partilhada entre a main e as carteiras apenas 
+ * caso o src_id da transação seja o seu próprio id. Antes de tentar ler a transação, deve verificar 
+ * se info->terminate tem valor 1. Em caso afirmativo, retorna imediatamente da função.
  */
 void wallet_receive_transaction(struct transaction* tx, int wallet_id, struct info_container* info, struct buffers* buffs);
 
