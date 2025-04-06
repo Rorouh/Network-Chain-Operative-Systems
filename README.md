@@ -8,7 +8,7 @@
   - Bruno Felisberto (fc32435)
 
 ## Descripción del Proyecto  
-Este proyecto consiste en desarrollar una aplicación en C llamada **SOchain**, que simula un sistema de transacciones para un token criptográfico denominado **SOT**. La idea es familiarizarnos con problemas de gestión de procesos, memoria dinámica y compartida, y comunicación entre procesos utilizando las APIs de Linux y POSIX.
+Este proyecto consiste en desarrollar una aplicación en C llamada **SOchain**, que simula un sistema de transacciones para un token criptográfico denominado **SOT**. La idea es familiarizarnos con problemas de gestión de procesos, memoria dinámica y compartida, y comunicación entre procesos.
 
 La aplicación está dividida en tres módulos principales:  
 - **Main:** Se encarga de la interacción con el usuario, recibe comandos, crea transacciones y muestra información (como saldos y recibos).  
