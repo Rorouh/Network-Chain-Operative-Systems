@@ -57,9 +57,9 @@ make run
 - **end:** Termina la ejecución de SOchain, imprime las estadísticas finales y cierra los procesos.
 
 ## Limitaciones del Trabajo  
-- **Sin sincronización:** En esta fase no se han implementado mecanismos de sincronización entre procesos. Esto puede generar que varios servidores intenten procesar la misma transacción simultáneamente. Se resolverá en la Fase 2.  
-- **Manejo básico de errores:** El control de errores es elemental; por ejemplo, la validación de parámetros y la gestión de fallos en la comunicación entre procesos se pueden mejorar.  
-- **Registro de transacciones:** Actualmente, las transacciones se muestran en pantalla en lugar de almacenarse en un ledger. Esto se ampliará en fases futuras.
+- **Sin sincronización:** En esta fase no se han implementado mecanismos de sincronización entre procesos.
+- **Manejo básico de errores:** El control de errores es muy importante, por ejemplo, la validación de parámetros y la gestión de fallos en la comunicación entre procesos.
+- **Registro de transacciones:** Actualmente, las transacciones se muestran en pantalla en lugar de almacenarse en un alguna billetera real.
 
 ## Instrucciones para la Entrega  
 - Se debe crear un fichero ZIP llamado **SO-XXX-p1.zip** (donde XXX es el número del grupo) que contenga todos los ficheros del proyecto, respetando la estructura indicada.  
