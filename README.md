@@ -1,7 +1,7 @@
 # SOchain – Fase 1
 
 ## Información del Grupo  
-- **Grupo:** XXX  
+- **Grupo:** 054  
 - **Integrantes:**  
   - Miguel Ángel López Sánchez (fc65675)  
   - Alejandro Domínguez (fc64447)  
@@ -25,7 +25,7 @@ El flujo es el siguiente:
 
 ```
 SOCHAIN/
-├── bin/                # Ejecutables generados (SOchain, SOchain_profs)
+├── bin/                # Ejecutables generados (SOchain)
 ├── inc/                # Archivos de cabecera (.h)
 ├── obj/                # Archivos objeto (.o)
 ├── src/                # Archivos fuente (.c)
@@ -61,7 +61,3 @@ make run
 - **Manejo básico de errores:** El control de errores es muy importante, por ejemplo, la validación de parámetros y la gestión de fallos en la comunicación entre procesos.
 - **Registro de transacciones:** Actualmente, las transacciones se muestran en pantalla en lugar de almacenarse en un alguna billetera real.
 
-## Instrucciones para la Entrega  
-- Se debe crear un fichero ZIP llamado **SO-XXX-p1.zip** (donde XXX es el número del grupo) que contenga todos los ficheros del proyecto, respetando la estructura indicada.  
-- Incluye este archivo README.md, donde se detallen las limitaciones del trabajo.  
-- Solo un miembro del grupo debe subir el ZIP según lo indicado.
