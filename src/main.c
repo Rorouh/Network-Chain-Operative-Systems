@@ -369,7 +369,6 @@ int main(int argc, char *argv[]) {
     create_shared_memory_structs(info, buffs);
     create_processes(info, buffs);
     user_interaction(info, buffs);
-    //release memory before terminating
     destroy_shared_memory_structs(info, buffs);
     destroy_dynamic_memory_structs(info, buffs);
     return 0;
