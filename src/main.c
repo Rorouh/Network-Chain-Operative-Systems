@@ -10,6 +10,8 @@
 #include "../inc/process.h"
 #include "../inc/wallet.h"
 #include "../inc/server.h"
+#include "../inc/synchronization.h"
+#include "../inc/csettings.h"
 
 /* Função que lê do stdin com o scanf apropriado para cada tipo de dados
  * e valida os argumentos da aplicação, incluindo o saldo inicial, 
@@ -352,8 +354,17 @@ int main(int argc, char *argv[]) {
     struct info_container* info = allocate_dynamic_memory(sizeof(struct info_container));
     struct buffers* buffs = allocate_dynamic_memory(sizeof(struct buffers));
     //execute main code
-    
-    main_args(argc, argv, info);
+    //main_args(argc, argv, info);
+    if(argc != 2) {
+        printf("Numero de argumentos inválido.\n");
+        return 1;
+    }
+
+    read_args(argv[1], info);
+    read_settings(argv[1], info);
+
+    info->sems = create_all_semaphores(info->buffers_size);
+
     create_dynamic_memory_structs(info, buffs);
     create_shared_memory_structs(info, buffs);
     create_processes(info, buffs);
@@ -362,5 +373,5 @@ int main(int argc, char *argv[]) {
     destroy_shared_memory_structs(info, buffs);
     destroy_dynamic_memory_structs(info, buffs);
     return 0;
-    }
+}
     

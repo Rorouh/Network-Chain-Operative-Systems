@@ -4,6 +4,7 @@
         "stat.h": "c",
         "mman.h": "c",
         "server.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "synchronization.h": "c"
     }
 }

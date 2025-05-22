@@ -14,6 +14,9 @@ struct info_container {
 	int n_servers;		        //número de servidores
 	int buffers_size;			//tamanho máximo dos buffers de memória partilhada
     int max_txs;				//número máximo de transações durante a execução
+	char log_filename[50];
+	char statistics_filename[50];
+	int period;
 	
 	float *balances;            //saldos atuais das carteiras
 
@@ -24,7 +27,18 @@ struct info_container {
 	int* servers_stats;	        //array com o número de transações processadas por cada servidor
 	
 	int* terminate;             //flag booleana, valor 1 indica que o SOchain deve terminar a sua execução
+	
+	struct semaphores* sems; 	//novo elemento na estrutura, definido em synchronization.h
+
 };
+
+
+
+/* 
+Acorda todos os processos filhos (que estejam a dormirem sem_wait), de forma a estes poderem terminar.
+ */
+void wakeup_processes(struct info_container* info);
+
 
 /* Função que lê do stdin com o scanf apropriado para cada tipo de dados
  * e valida os argumentos da aplicação, incluindo o saldo inicial, 
