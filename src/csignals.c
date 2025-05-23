@@ -16,10 +16,10 @@ void setup_signals(void (*handler)(int)) {
 
 void signal_handler(int sig) {
     if (sig == SIGINT || sig == SIGTERM) {
-        printf("\nRecebido sinal de terminação (%d). A encerrar...\n", sig);
+        printf("\nRecieved Ctrl-C (%d). Shutting down...\n", sig);
         // end_execution(...)
     } else if (sig == SIGALRM) {
-        printf("Recebido SIGALRM (timer).\n");
+        printf("Recieved SIGALRM (timer).\n");
         // passar aos "filhos" ?
     }
 }
