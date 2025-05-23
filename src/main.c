@@ -162,7 +162,7 @@ void user_interaction(struct info_container* info, struct buffers* buffs) {
         }
         else if (strcmp(comando, "stat") == 0) {
             print_stat(tx_counter, info);
-            save_operation("help", info->log_filename);
+            save_operation("stat", info->log_filename);
         }
         else if (strcmp(comando, "help") == 0) {
             help();
@@ -280,7 +280,7 @@ void create_transaction(int* tx_counter, struct info_container* info, struct buf
     (*tx_counter)++;
     
     char op[32];
-    snprintf(op, sizeof(op), "tx %d %d %.2f", src_id, dest_id, amount);
+    snprintf(op, sizeof(op), "trx %d %d %.2f", src_id, dest_id, amount);
     save_operation(op, info->log_filename);
 }
 
@@ -305,7 +305,7 @@ void receive_receipt(struct info_container* info, struct buffers* buffs) {
     }
     
     char op[32];
-    snprintf(op, sizeof(op), "rec %d", tx_id);
+    snprintf(op, sizeof(op), "rcp %d", tx_id);
     save_operation(op, info->log_filename);
 }
 
@@ -380,7 +380,7 @@ int main(int argc, char *argv[]) {
     }
 
     read_args(argv[1], info);
-    read_settings(argv[1], info);
+    read_settings(argv[2], info);
 
     info->sems = create_all_semaphores(info->buffers_size);
 
