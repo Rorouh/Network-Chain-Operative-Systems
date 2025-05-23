@@ -17,7 +17,7 @@ void setup_signals(void (*handler)(int)) {
 void signal_handler(int sig) {
     if (sig == SIGINT || sig == SIGTERM) {
         printf("\nRecieved Ctrl-C (%d). Shutting down...\n", sig);
-        // end_execution(...)
+        // end_execution(...) !?
     } else if (sig == SIGALRM) {
         printf("Recieved SIGALRM (timer).\n");
         // passar aos "filhos" ?

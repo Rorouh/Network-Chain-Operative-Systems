@@ -5,6 +5,7 @@
         "mman.h": "c",
         "server.h": "c",
         "stdlib.h": "c",
-        "synchronization.h": "c"
+        "synchronization.h": "c",
+        "time.h": "c"
     }
 }
