@@ -12,6 +12,9 @@
 #include "../inc/server.h"
 #include "../inc/synchronization.h"
 #include "../inc/csettings.h"
+#include "../inc/clog.h"
+#include "../inc/ctime.h"
+#include "../inc/main.h"
 
 /* Função que lê do stdin com o scanf apropriado para cada tipo de dados
  * e valida os argumentos da aplicação, incluindo o saldo inicial, 
@@ -159,12 +162,15 @@ void user_interaction(struct info_container* info, struct buffers* buffs) {
         }
         else if (strcmp(comando, "stat") == 0) {
             print_stat(tx_counter, info);
+            save_operation("help", info->log_filename);
         }
         else if (strcmp(comando, "help") == 0) {
             help();
+            save_operation("help", info->log_filename);
         }
         else if (strcmp(comando, "end") == 0) {
             end_execution(info, buffs);
+            save_operation("end", info->log_filename);
             break;
         }
         else {
@@ -230,6 +236,9 @@ void print_balance(struct info_container* info) {
         return;
     }
     printf("Saldo da carteira %d: %.2f SOT\n", id, info->balances[id]);
+    char op[32];
+    snprintf(op, sizeof(op), "bal %d", id);
+    save_operation(op, info->log_filename);
 }
 
 /* Cria uma nova transação com os dados inseridos pelo utilizador na linha de
@@ -265,9 +274,14 @@ void create_transaction(int* tx_counter, struct info_container* info, struct buf
     tx.wallet_signature = 0;
     tx.server_signature = 0;
     
+    save_time(&tx.change_time.main);
     write_main_wallets_buffer(buffs->buff_main_wallets, info->buffers_size, &tx);
     printf("Transação criada (id %d): %d -> %d, amount = %.2f\n", *tx_counter, src_id, dest_id, amount);
     (*tx_counter)++;
+    
+    char op[32];
+    snprintf(op, sizeof(op), "tx %d %d %.2f", src_id, dest_id, amount);
+    save_operation(op, info->log_filename);
 }
 
 /* Tenta ler o recibo da transação (identificada por id, o qual ainda está no
@@ -289,6 +303,10 @@ void receive_receipt(struct info_container* info, struct buffers* buffs) {
         printf("  src_id: %d, dest_id: %d, amount: %.2f\n", tx.src_id, tx.dest_id, tx.amount);
         printf("  wallet_signature: %d, server_signature: %d\n", tx.wallet_signature, tx.server_signature);
     }
+    
+    char op[32];
+    snprintf(op, sizeof(op), "rec %d", tx_id);
+    save_operation(op, info->log_filename);
 }
 
 /* Imprime as estatísticas atuais do sistema, incluindo as configurações iniciais
@@ -342,6 +360,7 @@ void help() {
     printf("  stat  - Imprimir estatísticas atuais do sistema\n");
     printf("  help  - Mostrar esta mensagem de ajuda\n");
     printf("  end   - Terminar a execução da SOchain\n");
+
 }
 
 /* Função principal do SOchain. Inicializa o sistema, chama as funções de alocação
@@ -355,7 +374,7 @@ int main(int argc, char *argv[]) {
     struct buffers* buffs = allocate_dynamic_memory(sizeof(struct buffers));
     //execute main code
     //main_args(argc, argv, info);
-    if(argc != 2) {
+    if(argc != 3) {
         printf("Numero de argumentos inválido.\n");
         return 1;
     }

@@ -17,6 +17,7 @@
 #define ID_SHM_BALANCES						"SHM_BALANCES"
 #define ID_SHM_TERMINATE					"SHM_TERMINATE"
 
+#include "ctime.h"
 // Estrutura de apontadores auxiliares para os buffer circulares
 struct pointers { 																					
 	int in;  																						
@@ -44,6 +45,7 @@ struct transaction {
 	float amount;               //quantidade de SOT a ser transferido na transação	
 	int wallet_signature;		//ID da carteira que assinou a transação (tem que se igual ao src_id)
 	int server_signature;	    //ID do servidor que validou e processou a transação (só assina se a transação é válida)
+	struct timestamps change_time;
 };
 
 // Estrutura que agrega os shared memory buffers necessários para comunicação entre processos

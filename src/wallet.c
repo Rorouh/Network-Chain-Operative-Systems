@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include "../inc/wallet.h"
 
+#include "../inc/ctime.h"
 /* Função principal de uma carteira. Deve executar um ciclo infinito onde,
  * em cada iteração, lê uma transação da main apenas caso o src_id da transação seja
  * o seu próprio id. Se info->terminate ainda for 0, a carteira assina autorizando a transação, 
@@ -40,6 +41,7 @@ int execute_wallet(int wallet_id, struct info_container* info, struct buffers* b
             wallet_process_transaction(&tx, wallet_id, info);
             transacciones_firmadas++;
             // enviar a transação assinada para o buffer Wallets->Servers
+            save_time(&tx.change_time.wallets);
             wallet_send_transaction(&tx, info, buffs);
         }
         

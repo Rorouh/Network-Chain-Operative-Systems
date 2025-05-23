@@ -108,5 +108,6 @@ void server_send_transaction(struct transaction* tx, struct info_container* info
         return; // a transação não foi processada com sucesso
     }
     // grava a transação no buffer de servidores em Main (ra_buffer)
+    save_time(&tx->change_time.servers);
     write_servers_main_buffer(buffs->buff_servers_main, info->buffers_size, tx);
 }
