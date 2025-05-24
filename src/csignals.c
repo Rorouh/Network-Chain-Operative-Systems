@@ -1,25 +1,53 @@
-#define _POSIX_C_SOURCE 200809L
-#include <signal.h>
 #include <stdio.h>
 #include "../inc/csignals.h"
+#include <signal.h>
 
-void setup_signals(void (*handler)(int)) {
+static struct info_container* info;
+static struct buffers* buffs;
+
+void setup_ctrlC_signal(struct info_container* info_main, struct buffers* buffs_main) {
+    info = info_main;
+    buffs = buffs_main;
     struct sigaction sa;
-    sa.sa_handler = handler;
+    sa.sa_handler = SIG_IGN;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = 0;
-
-    sigaction(SIGINT, &sa, NULL);   // Ctrl+C
-    sigaction(SIGTERM, &sa, NULL);  // kill
-    sigaction(SIGALRM, &sa, NULL);  // alarm
+    sigaction(SIGINT, &sa, NULL);
+}
+void setup_ctrlC_signal_parent(void) {
+    struct sigaction sa;
+    sa.sa_handler = signal_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGINT, &sa, NULL);
 }
 
-void signal_handler(int sig) {
-    if (sig == SIGINT || sig == SIGTERM) {
+void setup_alarm(void) {
+    struct sigaction sa;
+    sa.sa_handler = signal_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sigaction(SIGALRM, &sa, NULL);
+    alarm (info->period);
+}
+void signal_handler(int sig){
+    if (sig == SIGINT) {
         printf("\nRecieved Ctrl-C (%d). Shutting down...\n", sig);
-        // end_execution(...) !?
+        end_execution(info, buffs);
     } else if (sig == SIGALRM) {
         printf("Recieved SIGALRM (timer).\n");
-        // passar aos "filhos" ?
+
+        struct timespec now;
+        save_time(&now);
+
+        for(int i = 0; i < info->buffers_size; i++) {
+            if(buffs->buff_main_wallets->ptrs[i]) {
+                struct transaction tx = buffs->buff_main_wallets->buffer[i];
+                double time = (now.tv_sec  - tx.change_time.main.tv_sec)
+                               + (now.tv_nsec - tx.change_time.main.tv_nsec) * 1e-9;
+                printf("%d %.3f\n", tx.id, time);            
+            }
+        }
+        alarm (info->period);  
     }
 }

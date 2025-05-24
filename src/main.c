@@ -15,6 +15,7 @@
 #include "../inc/clog.h"
 #include "../inc/ctime.h"
 #include "../inc/main.h"
+#include "../inc/csignals.h"
 
 /* Função que lê do stdin com o scanf apropriado para cada tipo de dados
  * e valida os argumentos da aplicação, incluindo o saldo inicial, 
@@ -386,7 +387,11 @@ int main(int argc, char *argv[]) {
 
     create_dynamic_memory_structs(info, buffs);
     create_shared_memory_structs(info, buffs);
+    setup_ctrlC_signal(info, buffs);
     create_processes(info, buffs);
+    setup_ctrlC_signal_parent();
+    setup_alarm();
+    
     user_interaction(info, buffs);
     destroy_shared_memory_structs(info, buffs);
     destroy_dynamic_memory_structs(info, buffs);
