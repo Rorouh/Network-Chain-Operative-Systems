@@ -8,6 +8,7 @@
 #include "../inc/wallet.h"
 
 #include "../inc/ctime.h"
+#include"../inc/main.h"
 /* Função principal de uma carteira. Deve executar um ciclo infinito onde,
  * em cada iteração, lê uma transação da main apenas caso o src_id da transação seja
  * o seu próprio id. Se info->terminate ainda for 0, a carteira assina autorizando a transação, 
@@ -28,8 +29,9 @@ int execute_wallet(int wallet_id, struct info_container* info, struct buffers* b
         }
         
         //é feita uma tentativa de ler uma transação a partir do buffer Main.Wallets
+
         wallet_receive_transaction(&tx, wallet_id, info, buffs);
-        
+
         // se não foi obtida uma transação válida, aguardar alguns milissegundos e depois continua
         if (tx.id == -1) {
             usleep(100000); 
@@ -57,11 +59,15 @@ int execute_wallet(int wallet_id, struct info_container* info, struct buffers* b
  * se info->terminate tem valor 1. Em caso afirmativo, retorna imediatamente da função.
  */
 void wallet_receive_transaction(struct transaction* tx, int wallet_id, struct info_container* info, struct buffers* buffs) {
+    sem_wait(info->sems->main_wallet->unread);
+    sem_wait(info->sems->main_wallet->mutex);
     if (*(info->terminate) == 1) {
         return;
     }
 
     read_main_wallets_buffer(buffs->buff_main_wallets, wallet_id, info->buffers_size, tx);
+    sem_post(info->sems->main_wallet->mutex);
+    sem_post(info->sems->main_wallet->free_space);
 }
 
 /* Função que assina uma transação comprovando que a carteira de origem src_id da transação corresponde
@@ -82,5 +88,11 @@ void wallet_process_transaction(struct transaction* tx, int wallet_id, struct in
  * perde-se.
  */
 void wallet_send_transaction(struct transaction* tx, struct info_container* info, struct buffers* buffs) {
+    sem_wait(info->sems->wallet_server->free_space);
+    sem_wait(info->sems->wallet_server->mutex);
+
     write_wallets_servers_buffer(buffs->buff_wallets_servers, info->buffers_size, tx);
+
+    sem_post(info->sems->wallet_server->mutex);
+    sem_post(info->sems->wallet_server->unread);
 }

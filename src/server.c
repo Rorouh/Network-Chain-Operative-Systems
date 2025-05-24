@@ -8,6 +8,7 @@
 #include <string.h>
 #include "../inc/server.h"
 
+
 /* Função principal de um servidor. Deve executar um ciclo infinito onde, em 
  * cada iteração, lê uma transação do buffer de memória partilhada entre as carteiras e os servidores.
  * Se a transação tiver um id válido e info->terminate ainda for 0, o servidor valida, processa e assina 
@@ -29,8 +30,11 @@ int execute_server(int server_id, struct info_container* info, struct buffers* b
         }
         
         // tenta ler uma transação do buffer Wallets->Servers
+        sem_wait(info->sems->wallet_server->unread);
+        sem_wait(info->sems->wallet_server->mutex);
         server_receive_transaction(&tx, info, buffs);
-        
+        sem_post(info->sems->wallet_server->mutex);
+        sem_post(info->sems->wallet_server->free_space);
         // se nenhuma transação válida foi lida, aguarde 100 ms e continue
         if (tx.id == -1) {
             usleep(100000);  // Espera 100 ms
@@ -42,7 +46,11 @@ int execute_server(int server_id, struct info_container* info, struct buffers* b
         
         // só envia a transação se ela foi assinada pelo servidor (server_signature != 0)
         if (tx.server_signature != 0) {
+            sem_wait(info->sems->server_main->free_space);
+            sem_wait(info->sems->server_main->mutex);
             server_send_transaction(&tx, info, buffs);
+            sem_post(info->sems->server_main->mutex);
+            sem_post(info->sems->server_main->unread);
             transacciones_procesadas++;
         }
         
@@ -58,6 +66,7 @@ int execute_server(int server_id, struct info_container* info, struct buffers* b
  * transação do buffer, deve verificar se info->terminate tem valor 1. Em caso afirmativo, retorna imediatamente.
  */
 void server_receive_transaction(struct transaction* tx, struct info_container* info, struct buffers* buffs) {
+
     if (*(info->terminate) == 1) {
         tx->id = -1;
         return;
@@ -104,6 +113,7 @@ void server_process_transaction(struct transaction* tx, int server_id, struct in
  */
 void server_send_transaction(struct transaction* tx, struct info_container* info, struct buffers* buffs) {
     // verifica se a transação tem a assinatura do servidor (se não, é inválida)
+
     if (tx->server_signature == 0) {
         return; // a transação não foi processada com sucesso
     }

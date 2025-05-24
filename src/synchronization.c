@@ -8,7 +8,7 @@
 
 /* Função que cria *um* semaforo , inicializado a <vue> */
 sem_t* create_semaphore(char *name, unsigned v){
-    // sem_unlink(name); // should this be needed? ensures it doesent exist previously
+    sem_unlink(name); // should this be needed? ensures it doesent exist previously
     sem_t *s;
     s = sem_open(name, O_CREAT, 0644, v);
 
@@ -74,21 +74,21 @@ void destroy_all_semaphores(struct semaphores* s) {
     destroy_semaphore(STR_SEM_MAIN_WALLET_FREESPACE, s->main_wallet->free_space);
     destroy_semaphore(STR_SEM_MAIN_WALLET_UNREAD, s->main_wallet->unread);
     destroy_semaphore(STR_SEM_MAIN_WALLET_MUTEX, s->main_wallet->mutex);
-    
+    free(s->main_wallet);
     destroy_semaphore(STR_SEM_WALLET_SERVER_FREESPACE, s->wallet_server->free_space);
     destroy_semaphore(STR_SEM_WALLET_SERVER_UNREAD, s->wallet_server->unread);
     destroy_semaphore(STR_SEM_WALLET_SERVER_MUTEX, s->wallet_server->mutex);
-    
+    free(s->wallet_server);
     destroy_semaphore(STR_SEM_SERVER_MAIN_FREESPACE, s->server_main->free_space);
     destroy_semaphore(STR_SEM_SERVER_MAIN_UNREAD, s->server_main->unread);
     destroy_semaphore(STR_SEM_SERVER_MAIN_MUTEX, s->server_main->mutex);
-
-    destroy_semaphore(STR_SEM_TERMINATE_MUTEX, s->terminate_mutex);
-    
-    free(s->main_wallet);
-    free(s->wallet_server);
     free(s->server_main);
+    destroy_semaphore(STR_SEM_TERMINATE_MUTEX, s->terminate_mutex);
     free(s);
+    
+
+ 
+    
 }
 
 /* Imprimir o vor de *todos* os semaforos em <sems> */

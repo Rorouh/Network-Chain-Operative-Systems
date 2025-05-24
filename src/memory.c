@@ -73,6 +73,7 @@ void destroy_shared_memory(char* name, void* ptr, int size){
  * Se não houver nenhuma posição livre, não escreve nada e a transação é perdida.
  */
 void write_main_wallets_buffer(struct ra_buffer* buffer, int buffer_size, struct transaction* tx){
+ 
     for(int i = 0; i < buffer_size; i++){
         if(buffer->ptrs[i] == 0){
             buffer->ptrs[i] = 1;

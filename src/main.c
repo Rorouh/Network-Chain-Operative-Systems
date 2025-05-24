@@ -16,12 +16,14 @@
 #include "../inc/ctime.h"
 #include "../inc/main.h"
 #include "../inc/csignals.h"
+#include <termios.h>
 
 /* Função que lê do stdin com o scanf apropriado para cada tipo de dados
  * e valida os argumentos da aplicação, incluindo o saldo inicial, 
  * o número de carteiras, o número de servidores, o tamanho dos buffers 
  * e o número máximo de transações. Guarda essa informação na estrutura info_container.
  */
+
 void main_args(int argc, char *argv[], struct info_container *info) {
     if (argc != 6) {
         fprintf(stderr, "Uso: %s init_balance n_wallets n_servers buffers_size max_txs\n", argv[0]);
@@ -150,6 +152,7 @@ void user_interaction(struct info_container* info, struct buffers* buffs) {
     
     while (1) {
         printf("\nSOchain> ");
+        fflush(stdout);
         scanf("%s", comando);
         
         if (strcmp(comando, "bal") == 0) {
@@ -171,8 +174,10 @@ void user_interaction(struct info_container* info, struct buffers* buffs) {
         }
         else if (strcmp(comando, "end") == 0) {
             end_execution(info, buffs);
-            save_operation("end", info->log_filename);
-            break;
+        }
+        else if(strcmp(comando,"sem") == 0){
+            printf("semaforos: \n");
+            print_all_semaphores(info->sems);
         }
         else {
             printf("Comando desconhecido. Digite 'help' para ver os comandos disponíveis.\n");
@@ -207,9 +212,15 @@ void write_final_statistics(struct info_container* info) {
  */
 void end_execution(struct info_container* info, struct buffers* buffs) {
     *(info->terminate) = 1;   // Indica que o sistema deve ser encerrado
+    wakeup_processes(info);
     wait_processes(info);
     write_final_statistics(info);
     printf("Encerrando SOchain...\n");
+    save_operation("end", info->log_filename);
+    destroy_shared_memory_structs(info, buffs);
+    destroy_dynamic_memory_structs(info, buffs);
+    destroy_all_semaphores(info->sems);
+    exit(1);
 }
 
 /* Aguarda a terminação dos processos filhos previamente criados. Pode usar
@@ -266,7 +277,6 @@ void create_transaction(int* tx_counter, struct info_container* info, struct buf
         printf("Dados de transação inválidos.\n");
         return;
     }
-    
     struct transaction tx;
     tx.id = *tx_counter;
     tx.src_id = src_id;
@@ -276,7 +286,11 @@ void create_transaction(int* tx_counter, struct info_container* info, struct buf
     tx.server_signature = 0;
     
     save_time(&tx.change_time.main);
+    sem_wait(info->sems->main_wallet->free_space);
+    sem_wait(info->sems->main_wallet->mutex);
     write_main_wallets_buffer(buffs->buff_main_wallets, info->buffers_size, &tx);
+    sem_post(info->sems->main_wallet->mutex);
+    sem_post(info->sems->main_wallet->unread);
     printf("Transação criada (id %d): %d -> %d, amount = %.2f\n", *tx_counter, src_id, dest_id, amount);
     (*tx_counter)++;
     
@@ -295,8 +309,13 @@ void receive_receipt(struct info_container* info, struct buffers* buffs) {
     scanf("%d", &tx_id);
 
     struct transaction tx;
+
+    sem_wait(info->sems->server_main->unread);
+    sem_wait(info->sems->server_main->mutex);
     read_servers_main_buffer(buffs->buff_servers_main, tx_id, info->buffers_size, &tx);
-    
+    sem_post(info->sems->server_main->mutex);
+    sem_post(info->sems->server_main->free_space);
+
     if (tx.id == -1) {
         printf("Nenhum comprovativo encontrado para a transação %d.\n", tx_id);
     } else {
@@ -364,6 +383,37 @@ void help() {
 
 }
 
+void wakeup_processes(struct info_container* info) {
+    for (int i = 0; i < info->n_wallets; i++) {
+        sem_post(info->sems->main_wallet->unread);
+        sem_post(info->sems->main_wallet->free_space);
+        sem_post(info->sems->main_wallet->mutex);
+        sem_post(info->sems->wallet_server->unread);
+        sem_post(info->sems->wallet_server->free_space);
+        sem_post(info->sems->wallet_server->mutex);
+    }
+    for (int i = 0; i < info->n_servers; i++) {
+        sem_post(info->sems->wallet_server->unread);
+        sem_post(info->sems->wallet_server->free_space);
+        sem_post(info->sems->wallet_server->mutex);
+        sem_post(info->sems->server_main->unread);
+        sem_post(info->sems->server_main->free_space);
+        sem_post(info->sems->server_main->mutex);
+    }
+    for (int i = 0; i < info->n_wallets; i++) {
+        sem_post(info->sems->wallet_server->unread);
+        sem_post(info->sems->wallet_server->free_space);
+    }
+    for (int i = 0; i < info->n_servers; i++) {
+        sem_post(info->sems->wallet_server->unread);
+        sem_post(info->sems->wallet_server->free_space);
+    }
+    for (int i = 0; i < info->n_servers; i++) {
+        sem_post(info->sems->server_main->free_space);
+    }
+
+}
+
 /* Função principal do SOchain. Inicializa o sistema, chama as funções de alocação
  * de memória, a de criação de processos filhos, a de interação do utilizador 
  * e aguarda o encerramento dos processos para chamar as funções para libertar 
@@ -382,7 +432,6 @@ int main(int argc, char *argv[]) {
 
     read_args(argv[1], info);
     read_settings(argv[2], info);
-
     info->sems = create_all_semaphores(info->buffers_size);
 
     create_dynamic_memory_structs(info, buffs);
@@ -393,8 +442,6 @@ int main(int argc, char *argv[]) {
     setup_alarm();
     
     user_interaction(info, buffs);
-    destroy_shared_memory_structs(info, buffs);
-    destroy_dynamic_memory_structs(info, buffs);
     return 0;
 }
     

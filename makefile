@@ -11,8 +11,8 @@ OBJDIR = obj
 BINDIR = bin
 
 # Lista explícita de ficheros fuente y objetos
-SOURCES = main.c memory.c process.c server.c wallet.c synchronization.c csettings.c ctime.c clog.c
-OBJECTS = main.o memory.o process.o server.o wallet.o synchronization.o csettings.o ctime.o clog.o
+SOURCES = main.c memory.c process.c server.c wallet.c synchronization.c csettings.c ctime.c clog.c csignals.c
+OBJECTS = main.o memory.o process.o server.o wallet.o synchronization.o csettings.o ctime.o clog.o csignals.o
 
 EXEC = SOchain
 
@@ -54,6 +54,8 @@ $(OBJDIR)/ctime.o: $(SRCDIR)/ctime.c | $(OBJDIR)
 $(OBJDIR)/clog.o: $(SRCDIR)/clog.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $(SRCDIR)/clog.c -o $(OBJDIR)/clog.o
 
+$(OBJDIR)/csignals.o: $(SRCDIR)/csignals.c | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $(SRCDIR)/csignals.c -o $(OBJDIR)/csignals.o
 	
 # Regla para ejecutar el programa con argumentos por defecto:
 run: all

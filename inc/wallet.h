@@ -7,6 +7,7 @@
 
 #include "memory.h"
 #include "main.h"
+#include "synchronization.h"
 
 /* Função principal de uma carteira. Deve executar um ciclo infinito onde,
  * em cada iteração, lê uma transação da main apenas caso o src_id da transação seja

@@ -9,4 +9,6 @@ void setup_ctrlC_signal(struct info_container* info_main, struct buffers* buffs_
 void setup_ctrlC_signal_parent(void);
 void setup_alarm(void);
 void signal_handler(int sig);
+void print_alarm();
+
 #endif

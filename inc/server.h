@@ -7,6 +7,7 @@
 
 #include "memory.h"
 #include "main.h"
+#include"synchronization.h"
 
 /* Função principal de um servidor. Deve executar um ciclo infinito onde, em 
  * cada iteração, lê uma transação do buffer de memória partilhada entre as carteiras e os servidores.
