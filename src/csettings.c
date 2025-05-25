@@ -1,25 +1,46 @@
-#include "../inc/clog.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "../inc/csettings.h"
 
-void save_operation(char* operation, char* log_filename) {
-    FILE* log_file = fopen(log_filename, "a");
-    if(log_file == NULL) {
-        perror("Error ao abrir o ficheiro de log");
+void read_args(char *filename, struct info_container* info) {
+    FILE *fp = fopen(filename, "r");
+    if(fp == NULL) {
+        perror("Error ao abrir o ficheiro de argumentos");
         exit(EXIT_FAILURE);
     }
-    struct timespec t;
-    save_time(&t);
-    struct tm time = format_time(t);
 
-    fprintf(log_file,
-            "%04d%02d%02d %02d:%02d:%02d.%03ld %s\n",
-            time.tm_year + 1900,
-            time.tm_mon  + 1,
-            time.tm_mday,
-            time.tm_hour,
-            time.tm_min,
-            time.tm_sec,
-            t.tv_nsec/1000000,
-            operation
-        );
-    fclose(log_file);
+    if(fscanf(fp,
+        "%f %d %d %d %d",
+        &info->init_balance,
+        &info->n_wallets,
+        &info->n_servers,
+        &info->buffers_size,
+        &info->max_txs) != 5) {
+
+        fclose(fp);
+        perror("Error ao ler o ficheiro de argumentos");
+        exit(EXIT_FAILURE);
+    }
+
+    fclose(fp);
+}
+
+void read_settings(char *filename, struct info_container* info) {
+    FILE *fp = fopen(filename, "r");
+    if(fp == NULL) {
+        perror("Error ao abrir o ficheiro de argumentos");
+        exit(EXIT_FAILURE);
+    }
+    if (fscanf(fp, "%s %s %d",
+        info->log_filename,
+        info->statistics_filename,
+        &info->period) != 3){
+        
+        fclose(fp);
+        perror("Error ao ler o ficheiro de settings");
+        exit(EXIT_FAILURE);
+        
+    }
+
+    fclose(fp);
 }
