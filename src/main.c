@@ -20,9 +20,11 @@
 #include "../inc/cstats.h"
 #include <termios.h>
 
-//Biblioteca para errores
-#include <errno.h>
-
+int main_rcp = 0;
+int main_trx = 0;
+int period = 0;
+char log_filename [50];
+char statistics_filename[50];
 /* Função que lê do stdin com o scanf apropriado para cada tipo de dados
  * e valida os argumentos da aplicação, incluindo o saldo inicial, 
  * o número de carteiras, o número de servidores, o tamanho dos buffers 
@@ -176,11 +178,11 @@ void user_interaction(struct info_container* info, struct buffers* buffs) {
         }
         else if (strcmp(comando, "stat") == 0) {
             print_stat(tx_counter, info);
-            save_operation("stat", info->log_filename);
+            save_operation("stat", log_filename);
         }
         else if (strcmp(comando, "help") == 0) {
             help();
-            save_operation("help", info->log_filename);
+            save_operation("help", log_filename);
         }
         else if (strcmp(comando, "end") == 0) {
             end_execution(info, buffs);
@@ -225,14 +227,12 @@ void end_execution(struct info_container* info, struct buffers* buffs) {
     wakeup_processes(info);
     wait_processes(info);
 
-    // 1) imprime por pantalla
     write_final_statistics(info);
 
-    // 2) escribe en el fichero de estatísticas
-    write_statistics(info);
+    write_statistics(info,statistics_filename, main_trx, main_rcp);
 
     printf("Encerrando SOchain...\n");
-    save_operation("end", info->log_filename);
+    save_operation("end", log_filename);
 
     // destruir tudo
     destroy_shared_memory_structs(info, buffs);
@@ -273,7 +273,7 @@ void print_balance(struct info_container* info) {
     printf("Saldo da carteira %d: %.2f SOT\n", id, info->balances[id]);
     char op[32];
     snprintf(op, sizeof(op), "bal %d", id);
-    save_operation(op, info->log_filename);
+    save_operation(op, log_filename);
 }
 
 /* Cria uma nova transação com os dados inseridos pelo utilizador na linha de
@@ -326,10 +326,11 @@ void create_transaction(int* tx_counter, struct info_container* info, struct buf
     sem_post(info->sems->main_wallet->unread);
     printf("Transação criada (id %d): %d -> %d, amount = %.2f\n", *tx_counter, src_id, dest_id, amount);
     (*tx_counter)++;
+    main_trx++;
     
     char op[32];
     snprintf(op, sizeof(op), "trx %d %d %.2f", src_id, dest_id, amount);
-    save_operation(op, info->log_filename);
+    save_operation(op, log_filename);
 }
 
 /* Tenta ler o recibo da transação (identificada por id, o qual ainda está no
@@ -363,12 +364,13 @@ void receive_receipt(struct info_container* info, struct buffers* buffs) {
     read_servers_main_buffer(buffs->buff_servers_main, tx_id, info->buffers_size, &tx);
     
     if (tx.id == -1) {
-        sem_wait(info->sems->server_main->mutex);
+        sem_post(info->sems->server_main->mutex);
         sem_post(info->sems->server_main->unread);
         printf("Nenhum comprovativo encontrado para a transação %d.\n", tx_id);
     } else {
         sem_post(info->sems->server_main->mutex);
         sem_post(info->sems->server_main->free_space);
+        main_rcp++;
         printf("Recibo da transação %d:\n", tx_id);
         printf("  src_id: %d, dest_id: %d, amount: %.2f\n", tx.src_id, tx.dest_id, tx.amount);
         printf("  wallet_signature: %d, server_signature: %d\n", tx.wallet_signature, tx.server_signature);
@@ -376,7 +378,7 @@ void receive_receipt(struct info_container* info, struct buffers* buffs) {
     
     char op[32];
     snprintf(op, sizeof(op), "rcp %d", tx_id);
-    save_operation(op, info->log_filename);
+    save_operation(op, log_filename);
 }
 /* Imprime as estatísticas atuais do sistema, incluindo as configurações iniciais
  * do sistema, o valor das variáveis terminate e contador da transações criadas,
@@ -480,7 +482,7 @@ int main(int argc, char *argv[]) {
     }
 
     read_args(argv[1], info);
-    read_settings(argv[2], info);
+    read_settings(argv[2], log_filename,statistics_filename, &period);
     info->sems = create_all_semaphores(info->buffers_size);
 
     create_dynamic_memory_structs(info, buffs);
@@ -488,7 +490,7 @@ int main(int argc, char *argv[]) {
     setup_ctrlC_signal(info, buffs);
     create_processes(info, buffs);
     setup_ctrlC_signal_parent();
-    setup_alarm();
+    setup_alarm(period);
     
     user_interaction(info, buffs);
     return 0;

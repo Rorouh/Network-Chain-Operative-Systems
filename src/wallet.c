@@ -40,7 +40,7 @@ int execute_wallet(int wallet_id, struct info_container* info, struct buffers* b
             sem_post(info->sems->main_wallet->unread);
             sem_post(info->sems->main_wallet->mutex);
             usleep(100000); 
-            continue;
+            continue; 
         }
         sem_post(info->sems->main_wallet->mutex);        
         sem_post(info->sems->main_wallet->free_space);

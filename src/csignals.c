@@ -6,7 +6,7 @@
 
 static struct info_container* info;
 static struct buffers* buffs;
-
+int p = 0;
 void setup_ctrlC_signal(struct info_container* info_main, struct buffers* buffs_main) {
     info = info_main;
     buffs = buffs_main;
@@ -24,13 +24,14 @@ void setup_ctrlC_signal_parent(void) {
     sigaction(SIGINT, &sa, NULL);
 }
 
-void setup_alarm(void) {
+void setup_alarm(int period) {
     struct sigaction sa;
     sa.sa_handler = signal_handler;
     sigemptyset(&sa.sa_mask);
     sa.sa_flags = SA_RESTART;
     sigaction(SIGALRM, &sa, NULL);
-    alarm (info->period);
+    p = period;
+    alarm (period);
 }
 
 void signal_handler(int sig){
@@ -61,5 +62,5 @@ void print_alarm(){
             printf("%d %.3f\n", tx.id, time);  
         }
     }
-    alarm (info->period);  
+    alarm (p);  
 }

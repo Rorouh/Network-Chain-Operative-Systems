@@ -9,24 +9,11 @@
    - main_receipts  = nº de líneas "rcp " en log_filename
 */
 
-static void count_log_ops(const char *logfile, int *n_trx, int *n_rcp) {
-    FILE *f = fopen(logfile, "r");
-    if (!f) return;
-    char buf[256];
-    *n_trx = *n_rcp = 0;
-    while (fgets(buf, sizeof(buf), f)) {
-        // Después del timestamp, buf contiene " trx ", " rcp ", etc.
-        if (strstr(buf, " trx ") == buf+18) (*n_trx)++;
-        if (strstr(buf, " rcp ") == buf+18) (*n_rcp)++;
-    }
-    fclose(f);
-}
 
-void write_statistics(struct info_container* info) {
-    int main_received = 0, main_receipts = 0;
-    count_log_ops(info->log_filename, &main_received, &main_receipts);
+void write_statistics(struct info_container* info, char*sf, int ntrx, int nrcp) {
+    int main_received = ntrx, main_receipts = nrcp;
 
-    FILE *fp = fopen(info->statistics_filename, "w");
+    FILE *fp = fopen(sf, "w");
     if (!fp) {
         perror("Error abriendo fichero de estadísticas");
         return;

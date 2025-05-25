@@ -25,16 +25,16 @@ void read_args(char *filename, struct info_container* info) {
     fclose(fp);
 }
 
-void read_settings(char *filename, struct info_container* info) {
+void read_settings(char *filename, char *lf, char *sf, int *p) {
     FILE *fp = fopen(filename, "r");
     if(fp == NULL) {
         perror("Error ao abrir o ficheiro de argumentos");
         exit(EXIT_FAILURE);
     }
     if (fscanf(fp, "%s %s %d",
-        info->log_filename,
-        info->statistics_filename,
-        &info->period) != 3){
+        lf,
+        sf,
+        p) != 3){
         
         fclose(fp);
         perror("Error ao ler o ficheiro de settings");

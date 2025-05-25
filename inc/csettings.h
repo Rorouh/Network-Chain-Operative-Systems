@@ -8,8 +8,5 @@
 
 void read_args(char* filename, struct info_container* info);
 
-
-void read_settings(char* filename, struct info_container* info);
-
-
+void read_settings(char *filename, char *lf, char *sf, int *p);
 #endif

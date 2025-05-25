@@ -14,10 +14,6 @@ struct info_container {
 	int n_servers;		        //número de servidores
 	int buffers_size;			//tamanho máximo dos buffers de memória partilhada
     int max_txs;				//número máximo de transações durante a execução
-	char log_filename[50];
-	char statistics_filename[50];
-	int period;
-	
 	float *balances;            //saldos atuais das carteiras
 
 	int *wallets_pids;			//process ids das carteiras
