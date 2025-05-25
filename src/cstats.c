@@ -1,3 +1,7 @@
+// Miguel Angel Lopez Sanchez fc65675
+// Alejandro Dominguez fc64447
+// Bruno Felisberto fc32435
+
 // src/cstats.c
 #include <stdio.h>
 #include <string.h>
