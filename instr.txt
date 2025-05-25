@@ -1,6 +1,0 @@
-trx 0 1 10
-bal 1
-stat
-rcp 0
-end
-

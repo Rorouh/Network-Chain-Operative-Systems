@@ -300,6 +300,17 @@ void create_transaction(int* tx_counter, struct info_container* info, struct buf
         printf("Dados de transação inválidos.\n");
         return;
     }
+
+    int is = 0;
+    for(int i = 0; i < info->buffers_size; i++){
+        if(buffs->buff_main_wallets->ptrs[i] == 0){
+            is = 1;
+        }
+    }
+    if(is == 0){
+        printf("Buffer main_wallet lleno");
+        return;
+    }
     struct transaction tx;
     tx.id = *tx_counter;
     tx.src_id = src_id;
@@ -308,11 +319,10 @@ void create_transaction(int* tx_counter, struct info_container* info, struct buf
     tx.wallet_signature = 0;
     tx.server_signature = 0;
     
+    
     save_time(&tx.change_time.main);
     sem_wait(info->sems->main_wallet->free_space);
-    sem_wait(info->sems->main_wallet->mutex);
     write_main_wallets_buffer(buffs->buff_main_wallets, info->buffers_size, &tx);
-    sem_post(info->sems->main_wallet->mutex);
     sem_post(info->sems->main_wallet->unread);
     printf("Transação criada (id %d): %d -> %d, amount = %.2f\n", *tx_counter, src_id, dest_id, amount);
     (*tx_counter)++;
@@ -331,61 +341,43 @@ void create_transaction(int* tx_counter, struct info_container* info, struct buf
 void receive_receipt(struct info_container* info, struct buffers* buffs) {
     int tx_id;
     printf("Insira o ID da transação para obter o comprovativo: ");
-    fflush(stdout);
+    scanf("%d", &tx_id);
 
-    if (scanf("%d", &tx_id) != 1) {
-        int c;
-        while ((c = getchar()) != '\n' && c != EOF);
-        printf("ID inválido.\n");
-        return;
-    }
+    struct transaction tx;
 
-    /* 1) Intentamos “coger” un recibo sin bloquear indefinidamente */
-    if (sem_trywait(info->sems->server_main->unread) == -1) {
-        if (errno == EAGAIN) {
-            printf("Nenhum comprovativo encontrado para a transação %d.\n", tx_id);
-            return;
-        } else {
-            perror("sem_trywait");
-            return;
+    int is = 0;
+    for(int i = 0; i < info->buffers_size; i++){
+        if(buffs->buff_servers_main->ptrs[i] == 1){
+            struct transaction t = buffs->buff_servers_main->buffer[i];
+            if(t.id == tx_id){
+                is = 1;
+            }
         }
     }
-
-    /* 2) Ahora entramos en la sección crítica para acceder al buffer */
+    if (is == 0){
+        printf("El recibo no ha llegado al server o no existe");
+        return;
+    }
+    sem_wait(info->sems->server_main->unread);
     sem_wait(info->sems->server_main->mutex);
-
-    /* 3) Leemos buscando únicamente el recibo con el id pedido */
-    struct transaction tx;
-    read_servers_main_buffer(buffs->buff_servers_main,
-                             tx_id,
-                             info->buffers_size,
-                             &tx);
-
-    /* 4) Salimos de la sección crítica */
-    sem_post(info->sems->server_main->mutex);
-
+    read_servers_main_buffer(buffs->buff_servers_main, tx_id, info->buffers_size, &tx);
+    
     if (tx.id == -1) {
-        /* 5.a) No era el recibo que buscábamos -> devolvemos el “permiso” 
-                  para seguir leyendo más tarde */
+        sem_wait(info->sems->server_main->mutex);
         sem_post(info->sems->server_main->unread);
         printf("Nenhum comprovativo encontrado para a transação %d.\n", tx_id);
     } else {
-        /* 5.b) Era el correcto: liberamos un espacio en el buffer y mostramos */
+        sem_post(info->sems->server_main->mutex);
         sem_post(info->sems->server_main->free_space);
-
         printf("Recibo da transação %d:\n", tx_id);
-        printf("  src_id: %d, dest_id: %d, amount: %.2f\n",
-               tx.src_id, tx.dest_id, tx.amount);
-        printf("  wallet_signature: %d, server_signature: %d\n",
-               tx.wallet_signature, tx.server_signature);
-
-        /* 6) Log */
-        char op[32];
-        snprintf(op, sizeof(op), "rcp %d", tx_id);
-        save_operation(op, info->log_filename);
+        printf("  src_id: %d, dest_id: %d, amount: %.2f\n", tx.src_id, tx.dest_id, tx.amount);
+        printf("  wallet_signature: %d, server_signature: %d\n", tx.wallet_signature, tx.server_signature);
     }
+    
+    char op[32];
+    snprintf(op, sizeof(op), "rcp %d", tx_id);
+    save_operation(op, info->log_filename);
 }
-
 /* Imprime as estatísticas atuais do sistema, incluindo as configurações iniciais
  * do sistema, o valor das variáveis terminate e contador da transações criadas,
  * os pids dos processos e as restantes informações (e.g., número de transações 

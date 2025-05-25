@@ -29,22 +29,33 @@ int execute_wallet(int wallet_id, struct info_container* info, struct buffers* b
         }
         
         //é feita uma tentativa de ler uma transação a partir do buffer Main.Wallets
-
+        sem_wait(info->sems->main_wallet->unread);
+        sem_wait(info->sems->main_wallet->mutex);
         wallet_receive_transaction(&tx, wallet_id, info, buffs);
+        
+
 
         // se não foi obtida uma transação válida, aguardar alguns milissegundos e depois continua
         if (tx.id == -1) {
+            sem_post(info->sems->main_wallet->unread);
+            sem_post(info->sems->main_wallet->mutex);
             usleep(100000); 
             continue;
         }
-        
+        sem_post(info->sems->main_wallet->mutex);        
+        sem_post(info->sems->main_wallet->free_space);
         // processar (assinar) a transação apenas se o src_id corresponder ao da carteira
         if (tx.src_id == wallet_id) {
-            wallet_process_transaction(&tx, wallet_id, info);
-            transacciones_firmadas++;
+            
             // enviar a transação assinada para o buffer Wallets->Servers
             save_time(&tx.change_time.wallets);
+            sem_wait(info->sems->wallet_server->free_space);
+            sem_wait(info->sems->wallet_server->mutex);
+            wallet_process_transaction(&tx, wallet_id, info);
+            transacciones_firmadas++;  
             wallet_send_transaction(&tx, info, buffs);
+            sem_post(info->sems->wallet_server->mutex);        
+            sem_post(info->sems->wallet_server->unread);
         }
         
         // inicia a variável de transação para a próxima iteração
@@ -59,15 +70,11 @@ int execute_wallet(int wallet_id, struct info_container* info, struct buffers* b
  * se info->terminate tem valor 1. Em caso afirmativo, retorna imediatamente da função.
  */
 void wallet_receive_transaction(struct transaction* tx, int wallet_id, struct info_container* info, struct buffers* buffs) {
-    sem_wait(info->sems->main_wallet->unread);
-    sem_wait(info->sems->main_wallet->mutex);
     if (*(info->terminate) == 1) {
         return;
     }
 
     read_main_wallets_buffer(buffs->buff_main_wallets, wallet_id, info->buffers_size, tx);
-    sem_post(info->sems->main_wallet->mutex);
-    sem_post(info->sems->main_wallet->free_space);
 }
 
 /* Função que assina uma transação comprovando que a carteira de origem src_id da transação corresponde
@@ -88,11 +95,5 @@ void wallet_process_transaction(struct transaction* tx, int wallet_id, struct in
  * perde-se.
  */
 void wallet_send_transaction(struct transaction* tx, struct info_container* info, struct buffers* buffs) {
-    sem_wait(info->sems->wallet_server->free_space);
-    sem_wait(info->sems->wallet_server->mutex);
-
     write_wallets_servers_buffer(buffs->buff_wallets_servers, info->buffers_size, tx);
-
-    sem_post(info->sems->wallet_server->mutex);
-    sem_post(info->sems->wallet_server->unread);
 }

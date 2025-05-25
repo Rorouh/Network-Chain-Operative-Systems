@@ -92,7 +92,7 @@ void destroy_all_semaphores(struct semaphores* s) {
     // Terminate mutex
     destroy_semaphore(STR_SEM_TERMINATE_MUTEX, s->terminate_mutex);
 
-    // Estructura de semáforos
+  
     free(s);
 }
 

@@ -46,7 +46,7 @@ void signal_handler(int sig){
 void print_alarm(){
     struct timespec now;
     save_time(&now);
-
+    printf("\n");
     for(int i = 0; i < info->buffers_size; i++) {
         if(buffs->buff_main_wallets->ptrs[i] != 0) {
             struct transaction tx = buffs->buff_main_wallets->buffer[i];

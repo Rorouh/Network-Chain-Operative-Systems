@@ -1,4 +1,3 @@
-out.log
+log.txt
 stat.txt
-5
-
+20000

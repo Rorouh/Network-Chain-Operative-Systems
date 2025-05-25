@@ -33,14 +33,16 @@ int execute_server(int server_id, struct info_container* info, struct buffers* b
         sem_wait(info->sems->wallet_server->unread);
         sem_wait(info->sems->wallet_server->mutex);
         server_receive_transaction(&tx, info, buffs);
-        sem_post(info->sems->wallet_server->mutex);
-        sem_post(info->sems->wallet_server->free_space);
+        
         // se nenhuma transação válida foi lida, aguarde 100 ms e continue
-        if (tx.id == -1) {
+        if (tx.id == -1) { 
+            sem_post(info->sems->wallet_server->mutex); 
+            sem_post(info->sems->wallet_server->unread);           
             usleep(100000);  // Espera 100 ms
             continue;
         }
-        
+        sem_post(info->sems->wallet_server->mutex);
+        sem_post(info->sems->wallet_server->free_space);
         // processar a transação: valida , atualiza saldos e assina com o ID do servidor
         server_process_transaction(&tx, server_id, info);
         
