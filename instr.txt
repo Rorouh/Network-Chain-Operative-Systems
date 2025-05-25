@@ -1,6 +1,0 @@
-trx 1 2 10
-trx 0 1 10
-trx 2 0 10
-rcp 0
-rcp 1
-rcp 2

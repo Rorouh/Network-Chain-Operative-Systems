@@ -1,12 +1,12 @@
 Process Statistics:
-Main has PID [181284]
-There were 3 Wallets, PIDs [181285,181286,181287]
-There were 2 Servers, PIDs [181288,181289]
-Main received 3 transaction(s)!
-Main read 1 receipts.
+Main has PID [210887]
+There were 3 Wallets, PIDs [210888,210889,210890]
+There were 2 Servers, PIDs [210891,210892]
+Main received 1 transaction(s)!
+Main read 0 receipts.
 Wallet #0 signed 1 transaction(s)!
-Wallet #1 signed 1 transaction(s)!
-Wallet #2 signed 1 transaction(s)!
-Server #0 processed 2 transaction(s)!
-Server #1 processed 1 transaction(s)!
-Final Balances [100.00,100.00,100.00] SOT
+Wallet #1 signed 0 transaction(s)!
+Wallet #2 signed 0 transaction(s)!
+Server #0 processed 1 transaction(s)!
+Server #1 processed 0 transaction(s)!
+Final Balances [90.00,110.00,100.00] SOT

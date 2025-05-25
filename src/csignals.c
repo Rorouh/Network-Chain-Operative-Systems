@@ -25,13 +25,9 @@ void setup_ctrlC_signal_parent(void) {
 }
 
 void setup_alarm(int period) {
-    struct sigaction sa;
-    sa.sa_handler = signal_handler;
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    sigaction(SIGALRM, &sa, NULL);
     p = period;
-    alarm (period);
+    signal(SIGALRM, signal_handler);
+    alarm(p);
 }
 
 void signal_handler(int sig){

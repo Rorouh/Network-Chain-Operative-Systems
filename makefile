@@ -1,10 +1,9 @@
-# Makefile para el proyecto SOchain
 # Miguel Angel Lopez Sanchez fc65675
 # Alejandro Dominguez fc64447
 # Bruno Felisberto fc32447
 
 CC = gcc
-CFLAGS = -Wall -Wextra -g
+CFLAGS = -Wall -g
 
 SRCDIR = src
 OBJDIR = obj
