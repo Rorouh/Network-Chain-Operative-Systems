@@ -3,7 +3,7 @@
 ## Información del Grupo  
 - **Grupo:** 054  
 - **Integrantes:**  
-  - Miguel Ángel López Sánchez (fc65675)  
+  - Miguel Ángel López Sánchez (fc64675)  
   - Alejandro Domínguez (fc64447)  
   - Bruno Felisberto (fc32435)
 

@@ -16,6 +16,7 @@
 #include "../inc/ctime.h"
 #include "../inc/main.h"
 #include "../inc/csignals.h"
+#include "../inc/cstats.h"
 #include <termios.h>
 
 /* Função que lê do stdin com o scanf apropriado para cada tipo de dados
@@ -211,15 +212,24 @@ void write_final_statistics(struct info_container* info) {
  * estatísticas finais e retornar.
  */
 void end_execution(struct info_container* info, struct buffers* buffs) {
-    *(info->terminate) = 1;   // Indica que o sistema deve ser encerrado
+    *(info->terminate) = 1;   // Indica que el sistema debe ser encerrado
     wakeup_processes(info);
     wait_processes(info);
+
+    // 1) imprime por pantalla
     write_final_statistics(info);
+
+    // 2) escribe en el fichero de estatísticas
+    write_statistics(info);
+
     printf("Encerrando SOchain...\n");
     save_operation("end", info->log_filename);
+
+    // 3) libera todo
     destroy_shared_memory_structs(info, buffs);
     destroy_dynamic_memory_structs(info, buffs);
     destroy_all_semaphores(info->sems);
+
     exit(1);
 }
 

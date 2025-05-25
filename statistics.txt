@@ -1,0 +1,22 @@
+Process Statistics:
+Main has PID [65914]
+There were 10 Wallets, PIDs [65915,65916,65917,65918,65919,65920,65921,65922,65923,65924]
+There were 5 Servers, PIDs [65925,65926,65927,65928,65929]
+Main received 0 transaction(s)!
+Main read 0 receipts.
+Wallet #0 signed 1 transaction(s)!
+Wallet #1 signed 0 transaction(s)!
+Wallet #2 signed 0 transaction(s)!
+Wallet #3 signed 0 transaction(s)!
+Wallet #4 signed 0 transaction(s)!
+Wallet #5 signed 0 transaction(s)!
+Wallet #6 signed 0 transaction(s)!
+Wallet #7 signed 0 transaction(s)!
+Wallet #8 signed 0 transaction(s)!
+Wallet #9 signed 0 transaction(s)!
+Server #0 processed 1 transaction(s)!
+Server #1 processed 0 transaction(s)!
+Server #2 processed 0 transaction(s)!
+Server #3 processed 0 transaction(s)!
+Server #4 processed 0 transaction(s)!
+Final Balances [849.75,1150.25,1000.00,1000.00,1000.00,1000.00,1000.00,1000.00,1000.00,1000.00] SOT

@@ -7,6 +7,9 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include "../inc/process.h"
+#include "../inc/wallet.h"
+#include "../inc/server.h"
+
 
 /* Função que inicia um novo processo Wallet através da função fork do SO. O novo
  * processo filho irá executar a função execute_wallet respetiva, fazendo exit do retorno.

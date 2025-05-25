@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "../inc/csignals.h"
 #include <signal.h>
+#include <unistd.h>
+
 
 static struct info_container* info;
 static struct buffers* buffs;

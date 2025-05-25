@@ -8,6 +8,8 @@
 #include <sys/stat.h>
 #include <sys/mman.h>
 #include "../inc/memory.h"
+#include <string.h>
+#include <unistd.h>
 
 /* Função que reserva uma zona de memória dinâmica com o tamanho indicado
  * por size, preenche essa zona de memória com o valor 0, e retorna um 
