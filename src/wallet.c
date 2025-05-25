@@ -29,10 +29,12 @@ int execute_wallet(int wallet_id, struct info_container* info, struct buffers* b
         }
         
         //é feita uma tentativa de ler uma transação a partir do buffer Main.Wallets
+        
         sem_wait(info->sems->main_wallet->unread);
         sem_wait(info->sems->main_wallet->mutex);
         wallet_receive_transaction(&tx, wallet_id, info, buffs);
         
+      
 
 
         // se não foi obtida uma transação válida, aguardar alguns milissegundos e depois continua

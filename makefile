@@ -10,7 +10,6 @@ SRCDIR = src
 OBJDIR = obj
 BINDIR = bin
 
-# Lista explícita de ficheros fuente y objetos
 SOURCES = main.c memory.c process.c server.c wallet.c synchronization.c csettings.c ctime.c clog.c csignals.c cstats.c
 OBJECTS = main.o memory.o process.o server.o wallet.o synchronization.o csettings.o ctime.o clog.o csignals.o cstats.o
 
@@ -61,14 +60,7 @@ $(OBJDIR)/csignals.o: $(SRCDIR)/csignals.c | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $(SRCDIR)/csignals.c -o $(OBJDIR)/csignals.o
 	$(CC) $(CFLAGS) -c $(SRCDIR)/cstats.c -o $(OBJDIR)/cstats.o
 
-# Regla para ejecutar el programa con argumentos por defecto:
-run: all
-	./$(BINDIR)/$(EXEC) 100.0 3 2 10 50
-
-# clean: elimina únicamente los archivos objeto del directorio obj
 clean:
 	rm -f $(OBJDIR)/*.o
-
-# fclean: elimina también el ejecutable en bin
-fclean: clean
 	rm -f $(BINDIR)/$(EXEC)
+

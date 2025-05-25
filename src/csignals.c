@@ -55,6 +55,7 @@ void print_alarm(){
                             + (now.tv_nsec - tx.change_time.main.tv_nsec) * 1e-9;
             printf("%d %.3f\n", tx.id, time);            
         }
+
         if(buffs->buff_servers_main->ptrs[i] != 0){
             struct transaction tx = buffs->buff_servers_main->buffer[i];
             double time = (now.tv_sec  - tx.change_time.main.tv_sec)
@@ -62,5 +63,15 @@ void print_alarm(){
             printf("%d %.3f\n", tx.id, time);  
         }
     }
+
+    int in = buffs->buff_wallets_servers->ptrs->in;
+    int out = buffs->buff_wallets_servers->ptrs->out;
+    for(int i = out; i != in; i = (i+1)%info->buffers_size){
+        struct transaction tx = buffs->buff_wallets_servers->buffer[i];
+        double time = (now.tv_sec  - tx.change_time.main.tv_sec)
+                        + (now.tv_nsec - tx.change_time.main.tv_nsec) * 1e-9;
+        printf("%d %.3f\n", tx.id, time);
+    }
+
     alarm (p);  
 }

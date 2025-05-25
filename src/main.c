@@ -390,7 +390,7 @@ void print_stat(int tx_counter, struct info_container* info) {
     printf("Saldo inicial: %.2f\n", info->init_balance);
     printf("Número de carteiras: %d\n", info->n_wallets);
     printf("Número de servidores: %d\n", info->n_servers);
-    printf("Estatísticas Atuais ...: %d\n", info->buffers_size);
+    printf("Buffer size: %d\n", info->buffers_size);
     printf("Máximo de transações: %d\n", info->max_txs);
     printf("Transações criadas: %d\n", tx_counter);
     printf("Flag terminate: %d\n", *(info->terminate));
