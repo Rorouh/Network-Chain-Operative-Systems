@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <semaphore.h>
 #include "../inc/memory.h"
 #include "../inc/process.h"
 #include "../inc/wallet.h"
@@ -325,49 +326,64 @@ void create_transaction(int* tx_counter, struct info_container* info, struct buf
  * stdin a espera de ser lido dentro da função com o scanf) do buffer de memória
  * partilhada entre os servidores e a main, comprovando a conclusão da transação.
  */
+
+
 void receive_receipt(struct info_container* info, struct buffers* buffs) {
     int tx_id;
     printf("Insira o ID da transação para obter o comprovativo: ");
-    
-    if(scanf("%d", &tx_id)){
-        //entrada invalida
-        while (getchar() != '\n'); //limpiar stdin
-        printf("ID invalido.\n");
+    fflush(stdout);
+
+    if (scanf("%d", &tx_id) != 1) {
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
+        printf("ID inválido.\n");
         return;
     }
 
-    // Intentar "tomar" sin bloquear
+    /* 1) Intentamos “coger” un recibo sin bloquear indefinidamente */
     if (sem_trywait(info->sems->server_main->unread) == -1) {
         if (errno == EAGAIN) {
-            // No había recibos pendientes
             printf("Nenhum comprovativo encontrado para a transação %d.\n", tx_id);
             return;
         } else {
-            perror("sem_trywait");  // otro error inesperado
+            perror("sem_trywait");
             return;
         }
     }
 
-    // Si llegamos aquí, había un recibo: protegemos con mutex
+    /* 2) Ahora entramos en la sección crítica para acceder al buffer */
     sem_wait(info->sems->server_main->mutex);
 
+    /* 3) Leemos buscando únicamente el recibo con el id pedido */
     struct transaction tx;
-    read_servers_main_buffer(buffs->buff_servers_main, tx_id, info->buffers_size, &tx);
+    read_servers_main_buffer(buffs->buff_servers_main,
+                             tx_id,
+                             info->buffers_size,
+                             &tx);
 
+    /* 4) Salimos de la sección crítica */
     sem_post(info->sems->server_main->mutex);
-    sem_post(info->sems->server_main->free_space);
 
     if (tx.id == -1) {
+        /* 5.a) No era el recibo que buscábamos -> devolvemos el “permiso” 
+                  para seguir leyendo más tarde */
+        sem_post(info->sems->server_main->unread);
         printf("Nenhum comprovativo encontrado para a transação %d.\n", tx_id);
     } else {
+        /* 5.b) Era el correcto: liberamos un espacio en el buffer y mostramos */
+        sem_post(info->sems->server_main->free_space);
+
         printf("Recibo da transação %d:\n", tx_id);
-        printf("  src_id: %d, dest_id: %d, amount: %.2f\n", tx.src_id, tx.dest_id, tx.amount);
-        printf("  wallet_signature: %d, server_signature: %d\n", tx.wallet_signature, tx.server_signature);
+        printf("  src_id: %d, dest_id: %d, amount: %.2f\n",
+               tx.src_id, tx.dest_id, tx.amount);
+        printf("  wallet_signature: %d, server_signature: %d\n",
+               tx.wallet_signature, tx.server_signature);
+
+        /* 6) Log */
+        char op[32];
+        snprintf(op, sizeof(op), "rcp %d", tx_id);
+        save_operation(op, info->log_filename);
     }
-    
-    char op[32];
-    snprintf(op, sizeof(op), "rcp %d", tx_id);
-    save_operation(op, info->log_filename);
 }
 
 /* Imprime as estatísticas atuais do sistema, incluindo as configurações iniciais

@@ -71,25 +71,31 @@ struct semaphores* create_all_semaphores(unsigned v) {
 
 /* Função que destroi *todos* os semaforos na estrutura <sems> */
 void destroy_all_semaphores(struct semaphores* s) {
+    // Main-> Wallets
     destroy_semaphore(STR_SEM_MAIN_WALLET_FREESPACE, s->main_wallet->free_space);
-    destroy_semaphore(STR_SEM_MAIN_WALLET_UNREAD, s->main_wallet->unread);
-    destroy_semaphore(STR_SEM_MAIN_WALLET_MUTEX, s->main_wallet->mutex);
+    destroy_semaphore(STR_SEM_MAIN_WALLET_UNREAD,   s->main_wallet->unread);
+    destroy_semaphore(STR_SEM_MAIN_WALLET_MUTEX,    s->main_wallet->mutex);
     free(s->main_wallet);
-    destroy_semaphore(STR_SEM_WALLET_SERVER_FREESPACE, s->wallet_server->free_space);
-    destroy_semaphore(STR_SEM_WALLET_SERVER_UNREAD, s->wallet_server->unread);
-    destroy_semaphore(STR_SEM_WALLET_SERVER_MUTEX, s->wallet_server->mutex);
-    free(s->wallet_server);
-    destroy_semaphore(STR_SEM_SERVER_MAIN_FREESPACE, s->server_main->free_space);
-    destroy_semaphore(STR_SEM_SERVER_MAIN_UNREAD, s->server_main->unread);
-    destroy_semaphore(STR_SEM_SERVER_MAIN_MUTEX, s->server_main->mutex);
-    free(s->server_main);
-    destroy_semaphore(STR_SEM_TERMINATE_MUTEX, s->terminate_mutex);
-    free(s);
-    
 
- 
-    
+    // Wallets->Servers
+    destroy_semaphore(STR_SEM_WALLET_SERVER_FREESPACE, s->wallet_server->free_space);
+    destroy_semaphore(STR_SEM_WALLET_SERVER_UNREAD,    s->wallet_server->unread);
+    destroy_semaphore(STR_SEM_WALLET_SERVER_MUTEX,     s->wallet_server->mutex);
+    free(s->wallet_server);
+
+    // Servers -> Main
+    destroy_semaphore(STR_SEM_SERVER_MAIN_FREESPACE, s->server_main->free_space);
+    destroy_semaphore(STR_SEM_SERVER_MAIN_UNREAD,    s->server_main->unread);
+    destroy_semaphore(STR_SEM_SERVER_MAIN_MUTEX,     s->server_main->mutex);
+    free(s->server_main);
+
+    // Terminate mutex
+    destroy_semaphore(STR_SEM_TERMINATE_MUTEX, s->terminate_mutex);
+
+    // Estructura de semáforos
+    free(s);
 }
+
 
 /* Imprimir o vor de *todos* os semaforos em <sems> */
 void print_all_semaphores(struct semaphores* s) {
