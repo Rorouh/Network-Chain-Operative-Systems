@@ -1,0 +1,12 @@
+Process Statistics:
+Main has PID [94141]
+There were 3 Wallets, PIDs [94142,94143,94144]
+There were 2 Servers, PIDs [94145,94146]
+Main received 0 transaction(s)!
+Main read 0 receipts.
+Wallet #0 signed 1 transaction(s)!
+Wallet #1 signed 0 transaction(s)!
+Wallet #2 signed 0 transaction(s)!
+Server #0 processed 1 transaction(s)!
+Server #1 processed 0 transaction(s)!
+Final Balances [90.00,110.00,100.00] SOT

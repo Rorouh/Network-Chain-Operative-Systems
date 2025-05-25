@@ -1,3 +1,4 @@
-log.txt
-statistics.txt
-3
+out.log
+stat.txt
+5
+

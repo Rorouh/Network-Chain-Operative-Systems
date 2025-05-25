@@ -19,6 +19,9 @@
 #include "../inc/cstats.h"
 #include <termios.h>
 
+//Biblioteca para errores
+#include <errno.h>
+
 /* Função que lê do stdin com o scanf apropriado para cada tipo de dados
  * e valida os argumentos da aplicação, incluindo o saldo inicial, 
  * o número de carteiras, o número de servidores, o tamanho dos buffers 
@@ -96,6 +99,11 @@ void create_shared_memory_structs(struct info_container* info, struct buffers* b
  * função deallocate_dynamic_memory do memory.h
  */
 void destroy_dynamic_memory_structs(struct info_container* info, struct buffers* buffs) {
+    // liberar os arrays de PIDs
+    deallocate_dynamic_memory(info->wallets_pids);
+    deallocate_dynamic_memory(info->servers_pids);
+
+    // liberar os buffers
     deallocate_dynamic_memory(buffs->buff_main_wallets);
     deallocate_dynamic_memory(buffs->buff_wallets_servers);
     deallocate_dynamic_memory(buffs->buff_servers_main);
@@ -225,11 +233,15 @@ void end_execution(struct info_container* info, struct buffers* buffs) {
     printf("Encerrando SOchain...\n");
     save_operation("end", info->log_filename);
 
-    // 3) libera todo
+    // destruir tudo
     destroy_shared_memory_structs(info, buffs);
     destroy_dynamic_memory_structs(info, buffs);
     destroy_all_semaphores(info->sems);
 
+    // liberar os structs principais
+    free(info);
+    free(buffs);
+    
     exit(1);
 }
 
@@ -316,13 +328,32 @@ void create_transaction(int* tx_counter, struct info_container* info, struct buf
 void receive_receipt(struct info_container* info, struct buffers* buffs) {
     int tx_id;
     printf("Insira o ID da transação para obter o comprovativo: ");
-    scanf("%d", &tx_id);
+    
+    if(scanf("%d", &tx_id)){
+        //entrada invalida
+        while (getchar() != '\n'); //limpiar stdin
+        printf("ID invalido.\n");
+        return;
+    }
+
+    // Intentar "tomar" sin bloquear
+    if (sem_trywait(info->sems->server_main->unread) == -1) {
+        if (errno == EAGAIN) {
+            // No había recibos pendientes
+            printf("Nenhum comprovativo encontrado para a transação %d.\n", tx_id);
+            return;
+        } else {
+            perror("sem_trywait");  // otro error inesperado
+            return;
+        }
+    }
+
+    // Si llegamos aquí, había un recibo: protegemos con mutex
+    sem_wait(info->sems->server_main->mutex);
 
     struct transaction tx;
-
-    sem_wait(info->sems->server_main->unread);
-    sem_wait(info->sems->server_main->mutex);
     read_servers_main_buffer(buffs->buff_servers_main, tx_id, info->buffers_size, &tx);
+
     sem_post(info->sems->server_main->mutex);
     sem_post(info->sems->server_main->free_space);
 
