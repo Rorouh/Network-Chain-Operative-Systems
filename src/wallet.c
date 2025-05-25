@@ -20,24 +20,21 @@ int execute_wallet(int wallet_id, struct info_container* info, struct buffers* b
     int transacciones_firmadas = 0;
     struct transaction tx;
     
-    // inicializar a transação como "vazia"
+    // initialize the transaction as "empty"
     tx.id = -1;
     while (1) {
-        // verifica se o "terminate" foi pedido
+        // checks if "terminate" was requested
         if (*(info->terminate) == 1) {
             break;
         }
         
-        //é feita uma tentativa de ler uma transação a partir do buffer Main.Wallets
+        // an attempt is made to read a transaction from the Main->Wallets buffer
         
         sem_wait(info->sems->main_wallet->unread);
         sem_wait(info->sems->main_wallet->mutex);
         wallet_receive_transaction(&tx, wallet_id, info, buffs);
         
-      
-
-
-        // se não foi obtida uma transação válida, aguardar alguns milissegundos e depois continua
+        // if a valid transaction was not obtained, wait a few milliseconds and then continue
         if (tx.id == -1) {
             sem_post(info->sems->main_wallet->unread);
             sem_post(info->sems->main_wallet->mutex);
@@ -46,10 +43,10 @@ int execute_wallet(int wallet_id, struct info_container* info, struct buffers* b
         }
         sem_post(info->sems->main_wallet->mutex);        
         sem_post(info->sems->main_wallet->free_space);
-        // processar (assinar) a transação apenas se o src_id corresponder ao da carteira
+        // process (sign) the transaction only if the src_id matches the wallet's id
         if (tx.src_id == wallet_id) {
             
-            // enviar a transação assinada para o buffer Wallets->Servers
+            // send the signed transaction to the Wallets->Servers buffer
             save_time(&tx.change_time.wallets);
             sem_wait(info->sems->wallet_server->free_space);
             sem_wait(info->sems->wallet_server->mutex);
@@ -60,10 +57,10 @@ int execute_wallet(int wallet_id, struct info_container* info, struct buffers* b
             sem_post(info->sems->wallet_server->unread);
         }
         
-        // inicia a variável de transação para a próxima iteração
+        // initialize the transaction variable for the next iteration
         tx.id = -1;
     }
-    // após a conclusão, a carteira devolve o número total de transações assinadas
+    // after completion, the wallet returns the total number of signed transactions
     return transacciones_firmadas;
 }
 
@@ -86,7 +83,7 @@ void wallet_receive_transaction(struct transaction* tx, int wallet_id, struct in
 void wallet_process_transaction(struct transaction* tx, int wallet_id, struct info_container* info) {
     if (tx->src_id == wallet_id) {
         tx->wallet_signature = wallet_id;
-        // aumenta o contador de transações assinadas por esta carteira
+        // increases the counter of transactions signed by this wallet
         info->wallets_stats[wallet_id]++;
     }
     

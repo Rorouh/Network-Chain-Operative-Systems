@@ -21,11 +21,11 @@ int launch_wallet(int wallet_id, struct info_container* info, struct buffers* bu
         perror("Error al crear el proceso wallet (fork fallido)");
         exit(EXIT_FAILURE);
     } else if (pid == 0) {
-        // Processo filho: executa a função execute_wallet
+        // Child process: executes the execute_wallet function
         int ret = execute_wallet(wallet_id, info, buffs);
         exit(ret);
     }
-    // Processo pai: retorna o PID do processo filho
+    // Parent process: returns the PID of the child process
     return pid;
 }
 
@@ -39,11 +39,11 @@ int launch_server(int server_id, struct info_container* info, struct buffers* bu
         perror("Falha no processo do servidor a ser criado (falha na bifurcação)");
         exit(EXIT_FAILURE);
     } else if (pid == 0) {
-        // Processo filho: executa a função execute_server
+        // Child process: executes the execute_server function
         int ret = execute_server(server_id, info, buffs);
         exit(ret);
     }
-    // Processo pai: retorna o PID do processo filho.
+    // Parent process: returns the PID of the child process.
     return pid;
 }
 
@@ -59,6 +59,6 @@ int wait_process(int process_id) {
     if (WIFEXITED(status)) {
         return WEXITSTATUS(status);
     } else {
-        return -1;  // O processo não terminou corretamente
+        return -1;  // The process did not terminate correctly
     }
 }

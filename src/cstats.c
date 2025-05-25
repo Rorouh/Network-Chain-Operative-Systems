@@ -8,18 +8,17 @@
 #include "../inc/cstats.h"
 
 /*
-  Para no añadir campos nuevos a info_container, contamos:
-   - main_received  = nº de líneas "trx " en log_filename
-   - main_receipts  = nº de líneas "rcp " en log_filename
+  To avoid adding new fields to info_container, we count:
+   - main_received  = number of lines "trx " in log_filename
+   - main_receipts  = number of lines "rcp " in log_filename
 */
-
 
 void write_statistics(struct info_container* info, char*sf, int ntrx, int nrcp) {
     int main_received = ntrx, main_receipts = nrcp;
 
     FILE *fp = fopen(sf, "w");
     if (!fp) {
-        perror("Error abriendo fichero de estadísticas");
+        perror("Error opening statistics file");
         return;
     }
 
@@ -42,23 +41,23 @@ void write_statistics(struct info_container* info, char*sf, int ntrx, int nrcp) 
     }
     fputs("]\n", fp);
 
-    // Main recibidos y recibos
+    // Main received and receipts
     fprintf(fp, "Main received %d transaction(s)!\n", main_received);
     fprintf(fp, "Main read %d receipts.\n", main_receipts);
 
-    // Wallets firmadas
+    // Wallets signed
     for (int i = 0; i < info->n_wallets; i++) {
         fprintf(fp, "Wallet #%d signed %d transaction(s)!\n",
                 i, info->wallets_stats[i]);
     }
 
-    // Servers procesadas
+    // Servers processed
     for (int i = 0; i < info->n_servers; i++) {
         fprintf(fp, "Server #%d processed %d transaction(s)!\n",
                 i, info->servers_stats[i]);
     }
 
-    // Saldos finales
+    // Final balances
     fputs("Final Balances [", fp);
     for (int i = 0; i < info->n_wallets; i++) {
         fprintf(fp, "%.2f", info->balances[i]);

@@ -10,7 +10,7 @@
 #include <string.h>
 #include "../inc/synchronization.h"
 
-/* Função que cria *um* semaforo , inicializado a <vue> */
+/* Function that creates *one* semaphore, initialized to <v> */
 sem_t* create_semaphore(char *name, unsigned v){
     sem_unlink(name); // should this be needed? ensures it doesent exist previously
     sem_t *s;
@@ -24,16 +24,16 @@ sem_t* create_semaphore(char *name, unsigned v){
     return s;
 }
 
-/* Função para desligar/destruir um semaforo , em funcão do seu nome e pointer */
+/* Function to close/destroy a semaphore, given its name and pointer */
 void destroy_semaphore(char *name, sem_t *sem) {
     sem_close(sem);
     sem_unlink(name);
 }
 
-/* função genérica que cria 3 semaforos usados na lógica Produtor-Consumidor 
-1º argumento: v - vor inicial do semaforo free_space
-Restantes argumentos: os 3 nomes a dar aos semáforos->
-Retorna: um pointer para a estrutura que contem 3 semaforos-> */
+/* Generic function that creates 3 semaphores used in the Producer-Consumer logic
+1st argument: v - initial value for the free_space semaphore
+Remaining arguments: the 3 names to give to the semaphores->
+Returns: a pointer to the structure that contains 3 semaphores-> */
 struct triplet_sems* create_triplet_sems(unsigned v, char *freespace_name1, char *unread_name, char *mutex_name) {
     
     struct triplet_sems *t = malloc(sizeof(struct triplet_sems));
@@ -45,23 +45,23 @@ struct triplet_sems* create_triplet_sems(unsigned v, char *freespace_name1, char
     return t;
 }
 
-/* funcao que cria os 3 semaforos necessários para aceder ao buffer Main-Wallet */
+/* Function that creates the 3 semaphores needed to access the Main-Wallet buffer */
 struct triplet_sems* create_main_wallet_sems(unsigned v) {
     return create_triplet_sems(v, STR_SEM_MAIN_WALLET_FREESPACE, STR_SEM_MAIN_WALLET_UNREAD, STR_SEM_MAIN_WALLET_MUTEX);
 }
 
-/* funcao que cria os 3 semaforos necessários para aceder ao buffer Wallet-Server */
+/* Function that creates the 3 semaphores needed to access the Wallet-Server buffer */
 struct triplet_sems* create_wallet_server_sems(unsigned v) {
     return create_triplet_sems(v, STR_SEM_WALLET_SERVER_FREESPACE, STR_SEM_WALLET_SERVER_UNREAD, STR_SEM_WALLET_SERVER_MUTEX);
 }
 
-/* funcao que cria os 3 semaforos necessários para aceder ao buffer Server-Main */
+/* Function that creates the 3 semaphores needed to access the Server-Main buffer */
 struct triplet_sems* create_server_main_sems(unsigned v) {
     return create_triplet_sems(v,
         STR_SEM_SERVER_MAIN_FREESPACE, STR_SEM_SERVER_MAIN_UNREAD, STR_SEM_SERVER_MAIN_MUTEX);
 }
 
-/* Função que cria *todos* os semaforos do programa, inicializando a <v> os semaforos free_space */
+/* Function that creates *all* program semaphores, initializing the free_space semaphores to <v> */
 struct semaphores* create_all_semaphores(unsigned v) {
     struct semaphores *s = malloc(sizeof(struct semaphores));
 
@@ -73,7 +73,7 @@ struct semaphores* create_all_semaphores(unsigned v) {
     return s;
 }
 
-/* Função que destroi *todos* os semaforos na estrutura <sems> */
+/* Function that destroys *all* semaphores in the <sems> structure */
 void destroy_all_semaphores(struct semaphores* s) {
     // Main-> Wallets
     destroy_semaphore(STR_SEM_MAIN_WALLET_FREESPACE, s->main_wallet->free_space);
@@ -101,11 +101,11 @@ void destroy_all_semaphores(struct semaphores* s) {
 }
 
 
-/* Imprimir o vor de *todos* os semaforos em <sems> */
+/* Print the value of *all* semaphores in <sems> */
 void print_all_semaphores(struct semaphores* s) {
     int v;
 
-	// main -> wallets: wallets lê transacções que a main escreve
+	// main -> wallets: wallets read transactions that main writes
     sem_getvalue(s->main_wallet->free_space, &v);
     printf("Main Wallet freespace: %d\n", v);
     sem_getvalue(s->main_wallet->unread, &v);
@@ -113,7 +113,7 @@ void print_all_semaphores(struct semaphores* s) {
     sem_getvalue(s->main_wallet->mutex, &v);
     printf("Main Wallet mutex: %d\n", v);
 
-	// wallets -> servers: transações assinadas pelas wallets
+	// wallets -> servers: transactions signed by wallets
     sem_getvalue(s->wallet_server->free_space, &v);
     printf("Wallet Server freespace: %d\n", v);
     sem_getvalue(s->wallet_server->unread, &v);
@@ -121,7 +121,7 @@ void print_all_semaphores(struct semaphores* s) {
     sem_getvalue(s->wallet_server->mutex, &v);
     printf("Wallet Server mutex: %d\n", v);
 
-	// servers -> main:	recibos de transações devolvidos pelos servers
+	// servers -> main: receipts of transactions returned by servers
     sem_getvalue(s->server_main->free_space, &v);
     printf("Server Main freespace: %d\n", v);
     sem_getvalue(s->server_main->unread, &v);

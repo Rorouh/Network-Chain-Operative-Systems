@@ -11,6 +11,8 @@
         "csignals.h": "c",
         "string.h": "c",
         "stdio.h": "c",
-        "signal.h": "c"
+        "signal.h": "c",
+        "process.h": "c",
+        "wallet.h": "c"
     }
 }

@@ -21,7 +21,7 @@ int execute_server(int server_id, struct info_container* info, struct buffers* b
     int transacciones_procesadas = 0;
     struct transaction tx;
     
-    // a transação é iniciada com ID -1 para indicar que não há dados válidos
+    //     // the transaction is initialized with ID -1 to indicate there is no valid data
     tx.id = -1;
     
     while (1) {
@@ -29,24 +29,24 @@ int execute_server(int server_id, struct info_container* info, struct buffers* b
             break;
         }
         
-        // tenta ler uma transação do buffer Wallets->Servers
+        // tries to read a transaction from the Wallets->Servers buffer
         sem_wait(info->sems->wallet_server->unread);
         sem_wait(info->sems->wallet_server->mutex);
         server_receive_transaction(&tx, info, buffs);
         
-        // se nenhuma transação válida foi lida, aguarde 100 ms e continue
+        // if no valid transaction was read, wait 100 ms and continue
         if (tx.id == -1) { 
             sem_post(info->sems->wallet_server->mutex); 
             sem_post(info->sems->wallet_server->unread);           
-            usleep(100000);  // Espera 100 ms
+            usleep(100000);  // Waits 100 ms
             continue;
         }
         sem_post(info->sems->wallet_server->mutex);
         sem_post(info->sems->wallet_server->free_space);
-        // processar a transação: valida , atualiza saldos e assina com o ID do servidor
+        // process the transaction: validate, update balances, and sign with the server ID
         server_process_transaction(&tx, server_id, info);
         
-        // só envia a transação se ela foi assinada pelo servidor (server_signature != 0)
+        // only send the transaction if it was signed by the server (server_signature != 0)
         if (tx.server_signature != 0) {
             sem_wait(info->sems->server_main->free_space);
             sem_wait(info->sems->server_main->mutex);
@@ -56,7 +56,7 @@ int execute_server(int server_id, struct info_container* info, struct buffers* b
             transacciones_procesadas++;
         }
         
-        // eedefina tx.id para -1 para a próxima iteração
+        // reset tx.id to -1 for the next iteration
         tx.id = -1;
     }
     
@@ -73,7 +73,7 @@ void server_receive_transaction(struct transaction* tx, struct info_container* i
         tx->id = -1;
         return;
     }
-    // leitura do buffer circular entre Carteiras e Servidores
+    // read from the circular buffer between Wallets and Servers
     read_wallets_servers_buffer(buffs->buff_wallets_servers, info->buffers_size, tx);
 }
 
@@ -82,30 +82,30 @@ void server_receive_transaction(struct transaction* tx, struct info_container* i
  * adiciona a assinatura do servidor e incrementa o contador de transações processadas pelo servidor.
  */
 void server_process_transaction(struct transaction* tx, int server_id, struct info_container* info) {
-    // verifica se os identificadores são válidos
+    // check if the IDs are valid
     if (tx->src_id < 0 || tx->src_id >= info->n_wallets ||
         tx->dest_id < 0 || tx->dest_id >= info->n_wallets) {
-        return;  // transação inválida: os identificadores estão fora do intervalo
+        return;  // invalid transaction: IDs are out of range
     }
     
-    // verifica se a transação já foi assinada pela carteira (wallet_signature deve corresponder src_id)
+    // check if the transaction has already been signed by the wallet (wallet_signature should match src_id)
     if (tx->wallet_signature != tx->src_id) {
-        return;  // Transação inválida: assinatura de carteira incorreta
+        return;  // Invalid transaction: incorrect wallet signature
     }
     
-    // verifica se a carteira de origem tem fundos suficientes
+    // check if the source wallet has sufficient funds
     if (info->balances[tx->src_id] < tx->amount) {
-        return;  // transação inválida: fundos insuficientes
+        return;  // invalid transaction: insufficient funds
     }
     
-    // processar a transação: atualizar saldos
+    // process the transaction: update balances
     info->balances[tx->src_id] -= tx->amount;
     info->balances[tx->dest_id] += tx->amount;
     
-    // assina a transação com o ID do servidor
+    // sign the transaction with the server ID
     tx->server_signature = server_id+1;
     
-    // incrementa o contador de transações processadas por este servidor
+    // increment the counter of transactions processed by this server
     info->servers_stats[server_id]++;
 }
 
@@ -114,12 +114,12 @@ void server_process_transaction(struct transaction* tx, int server_id, struct in
  * Se não houver espaço no buffer, a transação não é enviada e o recibo perde-se.
  */
 void server_send_transaction(struct transaction* tx, struct info_container* info, struct buffers* buffs) {
-    // verifica se a transação tem a assinatura do servidor (se não, é inválida)
+    // check if the transaction has the server's signature (if not, it is invalid)
 
     if (tx->server_signature == 0) {
-        return; // a transação não foi processada com sucesso
+        return; // the transaction was not successfully processed
     }
-    // grava a transação no buffer de servidores em Main (ra_buffer)
+    // write the transaction to the servers-main buffer (ra_buffer)
     save_time(&tx->change_time.servers);
     write_servers_main_buffer(buffs->buff_servers_main, info->buffers_size, tx);
 }
